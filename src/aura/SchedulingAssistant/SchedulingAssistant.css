@@ -1,0 +1,78 @@
+/*
+Copyright 2017 IBM Corp.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+http://www.apache.org/licenses/LICENSE-2.0
+*/
+
+.THIS {}
+
+.THIS .weekEnds {
+    background-color:#d9d9d9;
+    color : black;
+}
+
+.THIS .normalDay {
+    color:black;
+    background-color:white; 
+}
+
+.THIS .currentDay {
+    background-color:#808080;
+}
+
+.THIS abbr.selectedDay { background-color: grey;color: white; }
+
+.THIS .fontExtraBigSize {
+    font-size:1.5em;
+}
+
+.THIS .fontBigSize {
+    font-size:1.2em;
+}
+
+.THIS .fontMediumSize {
+    font-size:1.1em;
+}
+
+.THIS .fontSmallSize {
+    font-size:1em;
+}
+
+.THIS .fontExtraSmallSize {
+    font-size:0.7em;
+}
+
+.THIS .slds-avatar--circle {
+    border:solid 1px #EEE;
+}
+
+.THIS .svg_content {
+    padding-right:3px;
+}
+
+.THIS .slds-banner-container {
+	text-align: center;
+    background-color: #687C9D;
+    padding: 6px;
+    font-size: 12px;
+    color: rgb(244, 246, 249);
+    margin-bottom: 1rem;
+}
+
+.THIS .slds-banner-container a{
+	color: rgb(244, 246, 249);
+    margin: 0 0 0 4px;
+    text-decoration: underline;
+}
+
+.THIS .no-margin-bottom {
+	margin-bottom: 0;
+}
+
+.THIS .slds-box {
+    padding: 0.7rem !important;
+    vertical-align: top;
+}

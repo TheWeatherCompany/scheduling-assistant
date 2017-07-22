@@ -1,0 +1,236 @@
+<!--
+Copyright 2017 IBM Corp.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+http://www.apache.org/licenses/LICENSE-2.0
+-->
+
+<apex:page standardController="ServiceAppointment" extensions="ServiceAppointmentEditController" tabStyle="ServiceAppointment">
+
+<apex:includeLightning />
+
+<style>
+.dateFormat { display: none; }
+
+.msgIcon {
+    display: none !important;
+}
+.customMessage * {
+    color: #fff !important;
+}
+.customMessage {
+    margin: 5px 0!important;
+    max-width: 1280px;
+    opacity: 1!important;
+    width: 100%;
+    font-size: 12px;
+    border: 0px;
+    padding-left: 10px;
+}
+.message {
+    opacity: .1
+}
+
+div.slds-scope {
+    max-width: 1280px;
+}
+
+body { overflow: hidden !important; }
+
+div.content_header { z-index: 10000; max-width: 1280px; width: 100%; position: fixed; top: 0px; height: 60px; }
+
+div.content_wrapper { margin-top: 60px; }
+</style>
+
+<div class="slds-scope">
+<apex:form id="mainForm">
+
+<div class="slds-page-header content_header">
+  <div class="slds-grid">
+    <div class="slds-col slds-has-flexi-truncate">
+      <div class="slds-media slds-no-space slds-grow">
+        <div class="slds-media__body">
+          <h1 class="slds-page-header__title slds-m-right--small slds-align-middle slds-truncate" title=""><apex:outputText value="{!if(ld.obj.Id == null,$Label.lbl_create_service_appointment,ld.obj['AppointmentNumber'])}" /></h1>
+        </div>
+
+          <div style="slds-float--right" class="slds-col slds-no-flex slds-grid slds-align-top">
+			<div class="slds-button-group" role="group">
+	              <apex:commandButton styleClass="slds-button slds-button--neutral slds-not-selected" action="{!save}" value="{!$Label.lbl_button_save}" />
+    	          <apex:commandButton styleClass="slds-button slds-button--neutral slds-not-selected" action="{!cancel}" value="{!$Label.lbl_button_cancel}" immediate="true" />
+      		</div>
+          </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="content_wrapper">
+<apex:pageMessages />
+
+<div class="slds-page-header__detail-row">
+
+<apex:variable var="addressSeen" value="false" />
+
+<apex:repeat value="{!ld.layoutSections}" var="layoutSection">
+    <apex:outputPanel layout="none" rendered="{!addressSeen}">
+        <!-- <h3 class="slds-section-title--divider"><apex:outputText value="{!$Label.lbl_arrival_window_weather}" /></h3> -->
+        <div class="slds-is-relative slds-p-around--large" style="min-height: 100px" id="weatherScheduleWidget">
+            <div class="slds-spinner_container">
+              <div role="status" class="slds-spinner slds-spinner--medium">
+                <span class="slds-assistive-text">Loading</span>
+                <div class="slds-spinner__dot-a"></div>
+                <div class="slds-spinner__dot-b"></div>
+              </div>
+            </div>
+        </div>
+        <apex:variable var="addressSeen" value="false" />
+    </apex:outputPanel>
+
+    <h3 class="slds-section-title--divider"><apex:outputText value="{!layoutSection.header}" /></h3>
+    <fieldset class="slds-form--compound slds-p-around--medium slds-m-bottom--x-small">
+        <div class="slds-form-element__group">
+        <apex:repeat value="{!layoutSection.rows}" var="row">
+            <div class="slds-form-element__row slds-p-bottom--small">
+            <apex:repeat value="{!row.items}" var="item">
+                <apex:outputPanel layout="none" rendered="{!item.fieldName == 'Address'}">
+                    <apex:variable var="addressSeen" value="true" />
+                </apex:outputPanel>
+                <apex:variable var="isNotCompound" value="true" rendered="{!not(item.isCompound)}">
+                    <apex:variable var="isRequired" value="{!item.isRequired || item.fieldName == 'OwnerId'}" />
+                    <div class="slds-form-element type-{!item.type} {!IF(isRequired,'is-required','')} slds-size--1-of-{!layoutSection.numCols}">
+                        <c:LightningInputField rendered="{!!item.isEmptySpace && item.isEditable}" required="{!isRequired}" sObject="{!ld.obj}" field="{!item.fieldName}" />
+                        <c:LightningOutputField rendered="{!!item.isEmptySpace && !item.isEditable}" sObject="{!ld.obj}" field="{!item.fieldName}" />
+                        <apex:outputText value="" rendered="{!item.isEmptySpace}" />
+                    </div>
+                </apex:variable>
+                <apex:variable var="isCompound" value="true" rendered="{!item.isCompound}">
+                    <div class="slds-form-element slds-size--1-of-{!layoutSection.numCols}">
+                    <apex:repeat value="{!item.subItems}" var="subItem">
+                        <apex:variable var="isRequired" value="{!subItem.isRequired || subItem.fieldName == 'Country' || subItem.fieldName == 'PostalCode'}" />
+                        <apex:outputPanel layout="none" rendered="{!subItem.fieldName == 'Street'}">
+                            <apex:variable var="addressSeen" value="true" />
+                        </apex:outputPanel>
+                        <div class="type-{!subItem.type} {!IF(isRequired,'is-required','')} slds-m-bottom--small">
+                            <c:LightningInputField rendered="{!!subItem.isEmptySpace && subItem.isEditable}" required="{!isRequired}" sObject="{!ld.obj}" field="{!subItem.fieldName}" />
+                            <c:LightningOutputField rendered="{!!subItem.isEmptySpace && !subItem.isEditable}" sObject="{!ld.obj}" field="{!subItem.fieldName}" />
+                            <apex:outputText value="" rendered="{!subItem.isEmptySpace}" />
+                        </div>
+                    </apex:repeat>
+                    </div>
+                </apex:variable>
+            </apex:repeat>
+            <apex:variable var="dummyCol" value="true" rendered="{!row.items.size<layoutSection.numCols}">
+                <div class="slds-form-element  slds-size--1-of-{!layoutSection.numCols}"></div>
+            </apex:variable>
+            </div>
+        </apex:repeat>
+        </div>
+    </fieldset>
+</apex:repeat>
+
+</div>
+</div>
+
+</apex:form>
+    </div>
+
+    <script>
+        var addrFields = ['PostalCode','Country'];
+        var frm = document.getElementById("{!$Component.mainForm}");
+        var addressUpdatedEvents = false;
+        addrFields.forEach(function(val) {
+            var aa = frm.getElementsByClassName('fld-' + val);
+            if (aa.length > 0) {
+                aa[0].onchange = handleAddressChange;
+            }
+        });
+
+        $Lightning.use("c:SchedulingAssistantApp", function() {
+          var dtVal = getFromField('{!JSENCODE(setting.Appointment_Date_Field__c)}' == 'Scheduled' ? 'fld-SchedStartTime' : 'fld-ArrivalWindowStartTime');
+          if (dtVal) {
+              dtVal = DateUtil.getDateTimeFromUserLocale(dtVal);
+          }
+          if (document.getElementById('weatherScheduleWidget')) {
+              $Lightning.createComponent("c:SchedulingAssistant",
+                  {
+                      units: '{!JSENCODE(if(setting.Units__c=='','English',setting.Units__c))}',
+                      appointmentWindowField: '{!JSENCODE(setting.Appointment_Date_Field__c)}',
+                      initDateTime: dtVal
+                  },
+                  "weatherScheduleWidget",
+                  function(cmp) {
+                      var dc = document.getElementById('weatherScheduleWidget');
+                      dc.getElementsByClassName('slds-spinner_container')[0].style.display = 'none';
+        
+                      addressUpdatedEvents = [];
+                      for (var i = 0; i < 1000; i++) {
+                          addressUpdatedEvents.push($A.get('e.c:addressUpdatedEvent'));
+                      }
+                      $A.eventService.addHandler({ "event": "c:appointmentWindowSelectedEvent", "handler" : appointmentWindowSelected });
+
+                      // go ahead and call it once in case the fields are already loaded on a save
+                      handleAddressChange();
+                  }
+			);
+          }
+        });
+        function appointmentWindowSelected(event) {
+            var apptField = '{!JSENCODE(setting.Appointment_Date_Field__c)}';
+            var startTime = event.getParam('StartDateTime');
+            var endTime = event.getParam('EndDateTime');
+            if (apptField == 'Arrival Window' || apptField == '') {
+            	setInField('fld-ArrivalWindowStartTime', startTime);
+	            setInField('fld-ArrivalWindowEndTime', endTime);
+            }
+            if (apptField == 'Scheduled' || apptField == '') {
+            	setInField('fld-SchedStartTime', startTime);
+	            setInField('fld-SchedEndTime', endTime);
+            }
+        }
+    	function setInField(fld, val) {
+            var flds = frm.getElementsByClassName(fld);
+            if (flds.length > 0) {
+                flds[0].value = val;
+            }
+        }
+    	function getFromField(fld) {
+            var flds = frm.getElementsByClassName(fld);
+            if (flds.length > 0) return flds[0].value;
+        }
+        function handleAddressChange() {
+            var evt = false;
+            if (addressUpdatedEvents && addressUpdatedEvents.length) {
+                evt = addressUpdatedEvents.pop();
+            }
+            if (!evt) return;
+
+            var params = {};
+            addrFields.forEach(function(val) {
+                var aa = frm.getElementsByClassName('fld-' + val);
+                if (aa.length > 0) {
+                    evt.setParam(val, aa[0].value);
+                }
+            });
+            evt.fire();
+        }
+
+    	var msgs = document.getElementsByClassName('errorM3');
+    	for (var i = 0; i < msgs.length; i++) {
+            msgs[i].className = 'message slds-notify slds-notify--alert slds-theme--error customMessage slds-theme--alert-texture';
+        }
+    	msgs = document.getElementsByClassName('warningM3');
+    	for (var i = 0; i < msgs.length; i++) {
+            msgs[i].className = 'message slds-notify slds-notify--toast slds-theme--warning customMessage slds-theme--alert-texture';
+        }
+    	msgs = document.getElementsByClassName('confirmM3');
+    	for (var i = 0; i < msgs.length; i++) {
+            msgs[i].className = 'message slds-notify slds-notify--alert slds-theme--success customMessage slds-theme--alert-texture';
+        }
+    	msgs = document.getElementsByClassName('infoM3');
+    	for (var i = 0; i < msgs.length; i++) {
+            msgs[i].className = 'message slds-notify slds-notify--toast customMessage slds-theme--alert-texture';
+        }
+    </script>
+</apex:page>

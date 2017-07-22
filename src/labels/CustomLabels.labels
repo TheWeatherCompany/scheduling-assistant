@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomLabels xmlns="http://soap.sforce.com/2006/04/metadata">
+    <labels>
+        <fullName>afternoon_interval</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>afternoon_interval</shortDescription>
+        <value>1PM - 7PM</value>
+    </labels>
+    <labels>
+        <fullName>degree_symbol</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>degree_symbol</shortDescription>
+        <value>°</value>
+    </labels>
+    <labels>
+        <fullName>err_unable_to_determine_location_by_postal_code</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>err_unable_to_determine_location_by_postal_code</shortDescription>
+        <value>The location can't be determned based on the specified postal code. Verify that the postal code is correct.</value>
+    </labels>
+    <labels>
+        <fullName>err_unable_to_load_api_metadata</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>err_unable_to_load_api_metadata</shortDescription>
+        <value>A valid Weather Company API key is required. Specify the API key for your data package subscription in the API Key field of the SUN_Weather API record on the Setup > Custom Metadata Types page. 
+
+To purchase a data package subscription, see</value>
+    </labels>
+    <labels>
+        <fullName>err_noAPI_Key</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>err_noAPI_Key</shortDescription>
+        <value>A valid Weather Company API key is required. Ensure that the API key for your data package subscription is specified in the API Key field of the SUN_Weather API record on the Setup > Custom Metadata Types page. 
+               
+               To purchase a data package subscription, see</value>
+    </labels>    
+    <labels>
+        <fullName>lbl_appointment_window</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>lbl_appointment_window</shortDescription>
+        <value>Arrival Window/Scheduled</value>
+    </labels>
+    <labels>
+        <fullName>lbl_button_cancel</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>lbl_button_cancel</shortDescription>
+        <value>Cancel</value>
+    </labels>
+    <labels>
+        <fullName>lbl_button_save</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>lbl_button_save</shortDescription>
+        <value>Save</value>
+    </labels>
+    <labels>
+        <fullName>lbl_create_service_appointment</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>lbl_create_service_appointment</shortDescription>
+        <value>Create Service Appointment</value>
+    </labels>
+    <labels>
+        <fullName>lbl_feels_like</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>lbl_feels_like</shortDescription>
+        <value>Feels like</value>
+    </labels>
+    <labels>
+        <fullName>lbl_full_forecast</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>lbl_full_forecast</shortDescription>
+        <value>Full Forecast</value>
+    </labels>
+    <labels>
+        <fullName>lbl_no_key</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>lbl_no_key</shortDescription>
+        <value>Please buy a key to get a current weather forecast</value>
+    </labels>
+    <labels>
+        <fullName>lbl_no_location</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>lbl_no_location</shortDescription>
+        <value>To see the weather for the service address, ensure that the address has a valid country and postal code. Weather forecasts are available for the US and Canada.</value>
+    </labels>
+    <labels>
+        <fullName>lbl_precip_chance</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>lbl_precip_chance</shortDescription>
+        <value>Chance of</value>
+    </labels>
+    <labels>
+        <fullName>lbl_set_arrival_start</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>lbl_set_arrival_start</shortDescription>
+        <value>Select</value>
+    </labels>
+    <labels>
+        <fullName>lbl_wind</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>lbl_wind</shortDescription>
+        <value>wind,</value>
+    </labels>
+    <labels>
+        <fullName>mock_city</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>mock_city</shortDescription>
+        <value>Washington</value>
+    </labels>
+    <labels>
+        <fullName>mock_state</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>DC</shortDescription>
+        <value>DC</value>
+    </labels>
+    <labels>
+        <fullName>morning_interval</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>morning_interval</shortDescription>
+        <value>7AM - 1PM</value>
+    </labels>
+    <labels>
+        <fullName>percentage_symbol</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>percentage_symbol</shortDescription>
+        <value>%</value>
+    </labels>
+    <labels>
+        <fullName>units_speed_english</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>units_speed_english</shortDescription>
+        <value>mph</value>
+    </labels>
+    <labels>
+        <fullName>units_speed_metric</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>units_speed_metric</shortDescription>
+        <value>kph</value>
+    </labels>
+    <labels>
+        <fullName>unmanaged_banner_message</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>unmanaged_banner_message</shortDescription>
+        <value>Get the</value>
+    </labels>
+    <labels>
+        <fullName>unmanaged_banner_url</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>unmanaged_banner_url</shortDescription>
+        <value>Weather Company API</value>
+    </labels>
+    <labels>
+        <fullName>unmanaged_buy_api_url</fullName>
+        <language>en_US</language>
+        <protected>true</protected>
+        <shortDescription>unmanaged_buy_api_url</shortDescription>
+        <value>https://business.weather.com/products/weather-data-packages-salesforce</value>
+    </labels>
+</CustomLabels>
+
+<!--
+Copyright 2017 IBM Corp.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+http://www.apache.org/licenses/LICENSE-2.0
+-->

@@ -1,0 +1,391 @@
+<!--
+Copyright 2017 IBM Corp.
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+http://www.apache.org/licenses/LICENSE-2.0
+-->
+
+<aura:component controller="WeatherService">
+    <aura:attribute name="postalCode" type="String" /> 
+    <aura:attribute name="country" type="String" /> 
+    <aura:attribute name="units" type="String"/> 
+    <aura:attribute name="appointmentWindowField" type="String" />
+    <aura:attribute name="initDateTime" type="DateTime"/>
+    
+    <aura:attribute name="latitude" access="private" type="Decimal"/>
+    <aura:attribute name="longitude" access="private" type="Decimal"/>
+    <aura:attribute name="weatherCity" access="private" type="String" /> 
+    <aura:attribute name="weatherState" access="private" type="String" /> 
+    <aura:attribute name="weatherPostalCode" access="private" type="String" /> 
+    <aura:attribute name="loadingToken" access="private" type="Decimal" default='0' />
+    <aura:attribute name="firstTimeLoading" access="private" type="Boolean" default='true'/>
+    <aura:attribute name="isDomLoaded" access="private" type="Boolean" default='false'/>
+    <aura:attribute name="noOfLessHoursFirstDay" access="private" type="Integer" default='6'/>
+    <aura:attribute name="dates" access="private" type="WeatherConditionDays[]" />    
+    <aura:attribute name="errorMessage" access="private" type="String" />
+    <aura:attribute name="forecastFirst24Hours" access="private" type="WeatherForecast[]" />
+    <aura:attribute name="forecastLast24Hours" access="private" type="WeatherForecast[]" />
+    <aura:attribute name="forecastIntraday" access="private" type="WeatherForecast[]" />
+    <aura:attribute name="selButtonId" access="private" type="String" default="0" /> 
+    <aura:attribute name="indexFirst" access="private" type="Integer" default="0" />
+    <aura:attribute name="indexSecond" access="private" type="Integer" default="0" />     
+    <aura:attribute name="indexFirst24Hour" access="private" type="Integer" default="-1" />
+    <aura:attribute name="indexLast24Hour" access="private" type="Integer" default="-1" />
+    <aura:attribute name="noOfDaysToNextMonth" access="private" type="Integer"/> 
+    <aura:attribute name="date" access="private" type="DateTime"/>
+    <aura:attribute name="selectedDay" access="private" type="Integer" default="0"/>    
+    <aura:attribute name="weatherURL" access="private" type="String" />
+    <aura:attribute name="weatherCountryCode" access="private" type="String"/>
+    <aura:attribute name="weatherAdminDistrict" access="private" type="String"/>   
+    <aura:attribute name="hasPurchasedKey" access="private" type="Boolean" default="true" />
+    
+    <aura:attribute name="useMockup" access="private" type="Boolean" default="true" />
+    
+    <aura:handler name="init" value="{!this}" action="{!c.doInit}"/>
+    <aura:handler event="c:addressUpdatedEvent" action="{!c.addressUpdatedEventHandler}"/>
+    <aura:registerEvent name="appointmentWindowSelectedEvent" type="c:appointmentWindowSelectedEvent" />
+    
+    <aura:if isTrue="{!'' + v.loadingToken != '0'}">
+        <div class="slds-form--compound">
+            <div class="slds-spinner_container" aura:id="uploadSpinner">
+                <div class="slds-spinner slds-spinner--medium" aria-hidden="false" role="alert">
+                    <div class="slds-spinner__dot-a"></div>
+                    <div class="slds-spinner__dot-b"></div>
+                </div>
+            </div>
+        </div>
+    </aura:if>
+    
+    <div aura:id="main_content">
+        <div class = "{!'slds-page-header slds-m-bottom--medium ' +  if(v.useMockup == true,'no-margin-bottom','')}">
+            <div class="slds-grid slds-grid--pull-padded"> 
+                <div class = "slds-size--1-of-2">
+                    <p class="slds-section__title">
+                        <aura:if isTrue="{!v.appointmentWindowField==''}">
+                            <ui:outputText value="{!$Label.c.lbl_appointment_window}" />
+                            <aura:set attribute="else">
+                                <ui:outputText value="{!v.appointmentWindowField}" />
+                            </aura:set>
+                        </aura:if>
+			&nbsp;Weather
+                    </p>
+                    <aura:if isTrue="{!v.errorMessage == ''}">
+                    	<p class="slds-text-title">
+                    	    <aura:if isTrue="{!v.weatherCity != null}"> 
+                                <ui:outputText value="{!v.weatherCity}" />
+                                <aura:set attribute="else">
+                                    <ui:outputText value="{!v.weatherPostalCode}" />
+                                </aura:set>
+                            </aura:if>	
+                            <aura:if isTrue="{!v.weatherCountryCode=='US'}">
+                            	, <ui:outputText value="{!v.weatherState}" />
+                                <aura:set attribute="else">
+                                    , <ui:outputText value="{!v.weatherAdminDistrict}" />
+                                </aura:set>
+                            </aura:if>
+                    	</p>
+                    </aura:if>
+                </div>
+                <div class="slds-size--1-of-2 slds-float--right">
+                    <aura:if isTrue="{!v.errorMessage == ''}">
+                        <fieldset class="slds-form-element slds-float--right">
+                            <div class="slds-form-element__control">
+                                <div class="slds-radio--button-group">
+                                    <span class="slds-button slds-radio--button">
+                                        <input type="radio" name="radio" id="English" checked="{!if(v.units == 'English','checked','')}" onclick="{!c.changeTempUnit}"/>
+                                        <label class="slds-radio--button__label" for="English">
+                                            <span class="slds-radio--faux">&deg;F</span>
+                                        </label>
+                                    </span>
+                                    <span class="slds-button slds-radio--button">
+                                        <input type="radio" name="radio" id="Metric" checked="{!if(v.units == 'Metric','checked','')}" onclick="{!c.changeTempUnit}"/>
+                                        <label class="slds-radio--button__label" for="Metric">
+                                            <span class="slds-radio--faux">&deg;C</span>
+                                        </label>
+                                    </span>                        
+                                </div>
+                            </div>
+                        </fieldset>         
+                    </aura:if>
+                </div>
+            </div>
+        </div>
+        
+        <aura:if isTrue="{!v.errorMessage != ''}">
+            <div class="fontBigSize">
+	         <ui:outputText value="{!v.errorMessage}" />
+		 <aura:if isTrue="{!v.hasPurchasedKey == false}">
+                       <a class="slds-m-left--xx-small" target="_blank" href="{!$Label.c.unmanaged_buy_api_url}">
+                             <ui:outputText value="{!$Label.c.unmanaged_banner_url}" />
+                       </a>
+                 </aura:if>
+	    </div>
+        </aura:if>
+        <aura:if aura:id="mockup" isTrue="{!v.useMockup}">
+            <div class="slds-size--1-of-1 slds-banner-container">
+            	<p class="banner">{!$Label.c.unmanaged_banner_message}<a target="_blank" href="{!$Label.c.unmanaged_buy_api_url}">{!$Label.c.unmanaged_banner_url}</a>.</p>	
+	        </div>
+        </aura:if>
+        <aura:if isTrue="{!v.errorMessage == ''}">
+            <div class = "slds-m-bottom--x-large">
+                <section class="slds-clearfix">
+                    <aura:iteration items="{!v.dates}" var="date" indexVar="index">  
+                        <div class = "slds-float--left">
+                            <aura:if isTrue="{!index==0&amp;&amp;v.forecastFirst24Hours.length>0}">
+                                <div class="slds-text-heading--small slds-m-top--x-small">
+                                    <p><ui:outputDate value="{!date.dates}" format="MMM"/></p>
+                                </div>
+                            </aura:if>
+                            <aura:if isTrue="{!and(index==v.noOfDaysToNextMonth,index!=0)}">
+                                <div class="slds-text-heading--small slds-m-top--x-small slds-m-left--x-large">
+                                    <p><ui:outputDate value="{!date.dates}" format="MMM"/></p>                     
+                                </div>
+                            </aura:if>
+                        </div>
+                        <div class="slds-m-left--x-large slds-float--left">
+                            <button style="{!if(index==0&amp;&amp;v.forecastFirst24Hours.length==0,'display:none','')}" type="button" data-day="{!index}" class="slds-button" onclick="{!c.handleButtonClick}">
+                                <span class="slds-avatar slds-avatar--circle slds-avatar--medium">
+                                    <abbr class="{!'slds-avatar__initials ' + if(date.weekEndsIndicator,'weekEnds','normalDay') + ' ' + if('' + v.selectedDay == '' + index,'selectedDay','')}">
+                                        <div>
+                                            <p class="fontExtraSmallSize"><ui:outputDate value="{!date.dates}" format="EE"/></p>
+                                            <p><ui:outputDate value="{!date.dates}" format="d"/></p>
+                                        </div>
+                                    </abbr>
+                                </span>
+                            </button>
+                        </div>
+                    </aura:iteration>
+                </section>
+            </div>
+            
+            <div style="{!if(v.selectedDay==0,'','display:none;')}" aura:id="first24Hours" class="slds-m-bottom--small slds-m-left--medium slds-scrollable--x">        
+                <div style="display: table-row">    
+                    <aura:iteration aura:id="first24HoursIteration" items="{!v.forecastFirst24Hours}" var="forecastHour" indexVar="index">                         
+                        <div style="{!'position: relative; display: table-cell;white-space:nowrap;' + if(index == v.indexFirst24Hour,'','border: 1px solid white')}" class="{!'slds-box ' + if(index == v.indexFirst24Hour,'slds-theme--shade','')}">
+                            <button type="button" onclick="{!c.handleButtonClick}" data-first24Hour="-1" style="{!'position: absolute; right: 10px; visibility: ' + if(index == v.indexFirst24Hour,'visibile','hidden')}" class="slds-button slds-notify__close slds-button--icon-inverse" title="Close">
+                                <lightning:icon size="x-small" iconName="utility:close" />
+                            </button>
+                            <div style="display: table">
+                                <div style="display: table-row">
+                                    <div style="display: table-cell">
+                                        <button type="button" data-first24hour="{!index}" class="slds-button" value="{!index}" onclick="{!c.handleButtonClick}">
+                                            <p style="white-space: nowrap" class="fontSmallSize">
+                                            <aura:if isTrue="{!v.useMockup}">
+                                            	{!forecastHour.asOfTime}
+                                            	<aura:set attribute="else">
+                                            		<ui:outputDateTime value="{!forecastHour.asOf}" format="hh:mm a"/>
+                                            	</aura:set>
+                                            </aura:if>
+                                            </p>
+                                            <img style="width:50px;" src="{!$Resource.weather_icons + '/icons/' + forecastHour.iconCode + '.svg'}" /><br/>
+                                            <p class="fontBigSize"><ui:outputText value="{!forecastHour.temp}" /><ui:outputText value="{!$Label.c.degree_symbol}"/></p>           
+                                            <aura:if isTrue="{!forecastHour.chanceOfPrecip!='0'}">
+                                                <p>
+                                                    <span class="svg_content"><![CDATA[<svg width="9px" viewbox="0 0 30 42"><path fill="#A0C6DC" stroke="#1BADFF" stroke-width="1px" d="M15 3 Q16.5 6.8 25 18 A12.8 12.8 0 1 1 5 18 Q13.5 6.8 15 3z" /></svg>]]></span>
+                                                    <ui:outputText value="{!forecastHour.chanceOfPrecip}" /><ui:outputText value="{!$Label.c.percentage_symbol}"/>
+                                                </p>
+                                            </aura:if>
+                                        </button>
+                                    </div>
+                                    <aura:if isTrue="{!index == v.indexFirst24Hour}">
+                                        <div class="slds-p-left--medium" style="display: table-cell">
+                                            <br/><br/>
+                                            <p class="fontBigSize"><ui:outputText value="{!forecastHour.phrase_22char}"/></p>
+                                            <p>
+                                                <span class="fontMediumSize"><ui:outputText value="{!$Label.c.lbl_feels_like}"/></span>
+                                                <span class="slds-m-left--xx-small"><ui:outputText value="{!forecastHour.feelsLikeTemp}"/></span>
+                                                <ui:outputText value="{!$Label.c.degree_symbol}"/>
+                                            </p>
+                                            <p class="fontSmallSize"><ui:outputText value="{!forecastHour.windSpeed}"/>
+                                                <aura:if isTrue="{!v.units == 'English'}">
+                                                    <ui:outputText class="slds-m-left--xxx-small" value="{!$Label.c.units_speed_english}" />
+                                                    <aura:set attribute="else">
+                                                        <ui:outputText class="slds-m-left--xxx-small" value="{!$Label.c.units_speed_metric}" />
+                                                    </aura:set>
+                                                </aura:if>
+                                                <span class="slds-m-left--xxx-small">
+                                                    <ui:outputText value="{!forecastHour.windDirectionCardinal}"/>
+                                                </span>
+                                            </p>                                   
+                                        </div>
+                                    </aura:if>                                
+                                </div>
+                            </div>
+                            <div class="slds-text-align--right">
+                                <button data-selectedtime="{!index}" style="{!'white-space: nowrap; visibility: ' + if(index==v.indexFirst24Hour,'visible','hidden')}" type="button" class="slds-button slds-button--neutral" onclick="{!c.selectTimeFirst24Hours}">
+                                    <span class="fontMediumSize">
+                                        <ui:outputText value="{!if(index==v.indexFirst24Hour,$Label.c.lbl_set_arrival_start,'a')}"/>
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+                    </aura:iteration>
+                </div>
+            </div>
+
+            <div style="{!if(v.selectedDay==1,'','display:none;')}"  aura:id="last24Hours" class="slds-m-bottom--small slds-m-left--medium slds-scrollable--x">
+                <div style="display: table-row">
+                    <aura:iteration items="{!v.forecastLast24Hours}" var="forecastHour" indexVar="index">           
+                        <div style="{!'position: relative; display: table-cell;white-space:nowrap;' + if(index == v.indexLast24Hour,'','border: 1px solid white')}" class="{!'slds-box ' + if(index == v.indexLast24Hour,'slds-theme--shade','')}">
+                            <button type="button" onclick="{!c.handleButtonClick}" data-last24Hour="-1" style="{!'position: absolute; right: 10px; visibility: ' + if(index == v.indexLast24Hour,'visibile','hidden')}" class="slds-button slds-notify__close slds-button--icon-inverse" title="Close">
+                                <lightning:icon size="x-small" iconName="utility:close" />
+                            </button>                
+                            <div style="display: table">
+                                <div style="display: table-row">
+                                    <div style="display: table-cell">
+                                        <button type="button" data-last24hour="{!index}" class="slds-button" value="{!index}" onclick="{!c.handleButtonClick}">
+                                            <p style="white-space: nowrap" class="fontSmallSize">
+                                            <aura:if isTrue="{!v.useMockup}">
+                                            	{!forecastHour.asOfTime}
+                                            	<aura:set attribute="else">
+                                            		<ui:outputDateTime class="selectedDate" value="{!forecastHour.asOf}" format="hh:mm a"/>
+                                            	</aura:set>
+                                            </aura:if>
+                                            </p>
+                                            <img style="width:50px;" src="{!$Resource.weather_icons + '/icons/' + forecastHour.iconCode + '.svg'}" /><br/>
+                                            <p class="fontBigSize"><ui:outputText value="{!forecastHour.temp}" /><ui:outputText value="{!$Label.c.degree_symbol}"/></p>
+                                            <aura:if isTrue="{!forecastHour.chanceOfPrecip!='0'}">
+                                                <p>
+                                                    <span class="svg_content"><![CDATA[<svg width="9px" viewbox="0 0 30 42"><path fill="#A0C6DC" stroke="#1BADFF" stroke-width="1px" d="M15 3 Q16.5 6.8 25 18 A12.8 12.8 0 1 1 5 18 Q13.5 6.8 15 3z" /></svg>]]></span>
+                                                    <ui:outputText value="{!forecastHour.chanceOfPrecip}" /><ui:outputText value="{!$Label.c.percentage_symbol}"/>
+                                                </p>
+                                            </aura:if>
+                                        </button>
+                                    </div>
+                                    <aura:if isTrue="{!index == v.indexLast24Hour}">
+                                        <div class="slds-p-left--medium" style="display: table-cell">
+                                            <br/><br/>
+                                            <p class="fontBigSize"><ui:outputText value="{!forecastHour.phrase_22char}"/></p>
+                                            <p>
+                                                <span class="fontMediumSize"><ui:outputText value="{!$Label.c.lbl_feels_like}"/></span>
+                                                <span class="slds-m-left--xx-small"><ui:outputText value="{!forecastHour.feelsLikeTemp}"/></span>
+                                                <ui:outputText value="{!$Label.c.degree_symbol}"/>
+                                            </p>
+                                            <p class="fontSmallSize"><ui:outputText value="{!forecastHour.windSpeed}"/>
+                                                <aura:if isTrue="{!v.units == 'English'}">
+                                                    <ui:outputText class="slds-m-left--xxx-small" value="{!$Label.c.units_speed_english}" />
+                                                    <aura:set attribute="else">
+                                                        <ui:outputText class="slds-m-left--xxx-small" value="{!$Label.c.units_speed_metric}" />
+                                                    </aura:set>
+                                                </aura:if>
+                                                <span class="slds-m-left--xxx-small">
+                                                    <ui:outputText value="{!forecastHour.windDirectionCardinal}"/>
+                                                </span>
+                                            </p>                                   
+                                        </div>
+                                    </aura:if>                                
+                                </div>
+                            </div>
+                            <div class="slds-text-align--right">
+                                <button data-selectedtime="{!index}" style="{!'white-space: nowrap; visibility: ' + if(index==v.indexLast24Hour,'visible','hidden')}" type="button" class="slds-button slds-button--neutral" onclick="{!c.selectTimeLast24Hours}">
+                                    <span class="fontMediumSize">
+                                        <ui:outputText value="{!if(index==v.indexLast24Hour,$Label.c.lbl_set_arrival_start,'a')}"/>
+                                    </span>
+                                </button>
+                            </div>
+                        </div>               
+                    </aura:iteration>
+                </div>
+            </div>
+            
+            
+
+            <div style="{!if(and(v.selectedDay!=0,v.selectedDay!=1),'','display:none;')}" aura:id = "forecastIntra" class = "slds-m-bottom--medium slds-p-left--xx-large">
+                <ul class="slds-grid slds-grid--pull-padded slds-m-bottom--medium">           
+                    <aura:iteration items="{!v.forecastIntraday}" var="forecastHour" indexVar="index">  
+                        <ui:outputText value=""/>
+                        <aura:if isTrue="{!or(index == v.indexFirst, index==v.indexSecond)}">                                                                  
+                            <li class="slds-card slds-size--1-of-2 slds-m-right--x-large slds-m-top--none">
+                                <div class="slds-card__header slds-grid slds-p-left--small slds-p-right--small slds-p-top--small slds-m-bottom--x-small">                                              
+                                    <header class="slds-has-flexi-truncate">
+                                        <h2><span class="slds-text-heading--x-small fontBigSize">
+                                            <aura:if isTrue="{!index == v.indexFirst}">
+                                                <ui:outputText value="{!$Label.c.morning_interval}"/>
+                                                <aura:set attribute="else">
+                                                    <ui:outputText value="{!$Label.c.afternoon_interval}"/>
+                                                </aura:set>
+                                            </aura:if> 
+                                            </span>
+                                        </h2>
+                                    </header>
+                                    <div class="slds-no-flex">                           
+                                        <button data-selectedtime="{!index}" type="button" class="slds-button slds-button--neutral set set-l" onclick="{!c.selectTimeIntraDays}">
+                                            <span class="fontBigSize">
+                                                <ui:outputText value="{!$Label.c.lbl_set_arrival_start}"/>
+                                            </span>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="slds-card__body slds-card__body_inner"> 
+                                    <div class="slds-grid slds-wrap slds-grid--pull-padded slds-p-vertical--medium slds-p-left--x-large">
+                                        <div class = "slds-size--1-of-6">                                         
+                                            <img src="{!$Resource.weather_icons + '/icons/' + forecastHour.iconCode + '.svg'}" /><br/>                                                                                                                     
+                                            <p class = "slds-text-align--center fontExtraBigSize">
+                                                <ui:outputText value="{!forecastHour. phrase_22char}" />                                               
+                                            </p>                                                                                 
+                                        </div>                                                 
+                                        <div class = "slds-size--5-of-6">                                            
+                                            <div class="slds-grid slds-wrap slds-grid--pull-padded slds-p-left--xx-large slds-p-vertical--large">
+                                                <div class="slds-size--1-of-4">
+                                                    <p class = "fontExtraBigSize">
+                                                        <ui:outputText value="{!forecastHour.temp}"/>
+                                                        <ui:outputText value="{!$Label.c.degree_symbol}"/> 
+                                                    </p>        
+                                                </div>
+                                                <div class="slds-size--3-of-4">       
+                                                    <aura:if isTrue="{!forecastHour.chanceOfPrecip!='0'}">                                                
+                                                        <p class ="fontMediumSize">                                                            
+                                                            <ui:outputText value="{!forecastHour.chanceOfPrecip}" />
+                                                            <ui:outputText value="{!$Label.c.percentage_symbol}"/>
+                                                            <span class="slds-p-left--xx-small"><ui:outputText value="{!$Label.c.lbl_precip_chance}"/></span>
+                                                            <span class="slds-p-left--xx-small"><ui:outputText value="{!forecastHour.precipType}"/></span>
+                                                        </p>
+                                                    </aura:if>  
+                                                    <p class ="fontMediumSize" ><ui:outputText value="{!forecastHour.windSpeed}"/>
+                                                        <aura:if isTrue="{!v.units == 'English'}">
+                                                            <ui:outputText class="slds-m-left--xxx-small" value="{!$Label.c.units_speed_english}" />
+                                                            <aura:set attribute="else">
+                                                                <ui:outputText class="slds-m-left--xxx-small" value="{!$Label.c.units_speed_metric}" />
+                                                            </aura:set>
+                                                        </aura:if>
+                                                        <span class="slds-p-left--xx-small"><ui:outputText value="{!$Label.c.lbl_wind}"/></span>
+                                                        <span class="slds-m-left--xx-small">
+                                                            <ui:outputText value="{!forecastHour.windDirectionCardinal}"/>
+                                                        </span>
+                                                    </p>                                                                                            
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>       
+                                </div>
+                            </li>                                                                  
+                        </aura:if>               
+                    </aura:iteration>
+                </ul>
+            </div>            
+        </aura:if>
+        
+        <div class="slds-grid slds-wrap slds-border--top">  
+            <div class="slds-size--1-of-8 slds-p-vertical--medium">
+                <img src="{!$Resource.WeatherCompanyLogo}"/>
+            </div>    
+            
+            <aura:if isTrue="{!v.errorMessage == ''}">
+                <div class="slds-size--7-of-8 slds-float--right">            
+                    <div class="slds-text-align--right slds-p-vertical--medium slds-text-heading--medium">
+                        <a target="_blank" href="{!v.weatherURL}">
+                            <ui:outputText value="{!$Label.c.lbl_full_forecast}" />&nbsp;&raquo;
+                        </a>
+                    </div>
+                </div>
+            </aura:if>
+        </div>
+    </div>
+
+    <!-- force it to be part of the package -->
+    <div style="display: none">
+        {!$Label.c.lbl_no_location}
+    </div>
+</aura:component>
