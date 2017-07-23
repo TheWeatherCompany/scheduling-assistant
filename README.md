@@ -10,7 +10,7 @@ For a more detailed forecast, links are provided to a full 10-day forecast on We
 
 You can download the unmanaged component from [GitHub](https://github.com/TheWeatherCompany/scheduling-assistant). To set it up, add the API key from your paid data package subscription from The Weather Company and customize per your needs. Alternatively, you can use the code as a sample to understand how the API works and build your own standalone app.
 
-*Tip*: The component is shipped with mock data so you can try it out before you obtain an API key.
+*Tip:* The component is shipped with mock data so you can try it out before you obtain an API key.
 
 ## Obtaining an API Key 
 By purchasing a data package and access key from The Weather Company, you can include any of the following data streams into the component:
@@ -38,9 +38,9 @@ To set up the component:
 	| Units | Default type of units to display; possible values: English/metric|
 	| Appointment date field | Which fields to populate when a user selects a date and time in the component. Possible values: Arrival Window/Scheduled. If no value is specified, both the Arrival Window and Scheduled fields are populated.| 
 
-3. Grant users the required permissions for the component. In **Setup > Permission Sets**, assign users the **Weather Company Scheduling Assistant User permission set** (see [Assign a Permission Set to Multiple Users](https://help.salesforce.com/articleView?id=perm_sets_mass_assign.htm)). 
+3. Grant users the required permissions for the component. In **Setup > Permission Sets**, assign users the **Weather Company Scheduling Assistant User** permission set (see [Assign a Permission Set to Multiple Users](https://help.salesforce.com/articleView?id=perm_sets_mass_assign.htm)). 
 4. Override the default Service Appointments page with a custom Visualforce page that includes the component (see [Override Standard Buttons and Tab Home Pages](https://help.salesforce.com/articleView?err=1&id=links_customize_override.htm)):
-	1. In **Setup > Object Manager**, click Service Appointment and click Buttons, Links, and Actions.
+	1. In **Setup > Object Manager**, click **Service Appointment** and click **Buttons, Links, and Actions**.
 	2. Edit the New and Edit items to override the default Salesforce page with the ServiceAppointmentRecordEdit Visualforce page. 
 5. In **Setup > Remote Site Settings**, add an entry for the URL of the custom form, in the format https://<i></i>*MyDomain_Name*--c.*Instance*.visual.force.com (see [Find your Instance](https://help.salesforce.com/articleView?id=000002889&language=en_US&type=1)). 
 
@@ -51,8 +51,8 @@ After you obtain an API key (see [Weather Company Data for Salesforce](https://b
 
 To enable the component to display real data:
 1. In Salesforce, create a CSP Trusted Site for https://<i></i>api.weather.com to access The Weather Company APIs (see [Create CSP Trusted Sites to Access Third-Party APIs](https://help.salesforce.com/articleView?id=csp_trusted_sites.htm)).
-2. Enter the API key. In Custom Metadata Types, edit the SUN_Weather API record (see [Add or Edit Custom Metadata Records Declaratively](https://help.salesforce.com/articleView?id=custommetadatatypes_ui_populate.htm)). For the API Key field, specify the API key you received when you purchased the data package.  For the API User field, don’t specify a value.  *Tip*: If the API Key field is not displayed for the API record, edit its page layout.
-3. Disable the sample data response and activate the API calls to Weather.com. In the src/aura/weathersched/weathersched.cmp file, change the useMockup attribute to “false.” *Tip*: To improve performance, configure Salesforce to automatically add geocodes to all Account, Contact, and Lead records (see [Set Up Geocode Data Integration Rules](https://help.salesforce.com/articleView?id=data_dot_com_clean_add_geocode_information_to_all_records.htm)). The component then uses the geocode values instead of making API calls to determine the latitude and longitude for each address. 
+2. Enter the API key. In Custom Metadata Types, edit the SUN_Weather API record (see [Add or Edit Custom Metadata Records Declaratively](https://help.salesforce.com/articleView?id=custommetadatatypes_ui_populate.htm)). For the API Key field, specify the API key you received when you purchased the data package.  For the API User field, don’t specify a value.  *Tip:* If the API Key field is not displayed for the API record, edit its page layout.
+3. Disable the sample data response and activate the API calls to Weather.com. In the src/aura/weathersched/weathersched.cmp file, change the useMockup attribute to “false.” *Tip:* To improve performance, configure Salesforce to automatically add geocodes to all Account, Contact, and Lead records (see [Set Up Geocode Data Integration Rules](https://help.salesforce.com/articleView?id=data_dot_com_clean_add_geocode_information_to_all_records.htm)). The component then uses the geocode values instead of making API calls to determine the latitude and longitude for each address. 
 
 ## Extending the Component
 You can extend the component by purchasing a data subscription and customizing the code. You can add weather data as needed for more precise forecast locations; more forecast details; and a longer-term, more detailed outlook. For example, you can add the following:
