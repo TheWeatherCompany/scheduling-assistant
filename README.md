@@ -1,4 +1,4 @@
-<link rel="shortcut icon" type="image/x-icon" href="{{ site.baseurl }}/favicon.ico">
+
 # The Weather Scheduling Assistant Unmanaged Component Guide
 
 This component allows you to choose the optimal time for an appointment based on weather conditions. For example, you can find a time to schedule an outdoor service call when no precipitation is expected. The component adds the following weather data to service appointments:
