@@ -227,7 +227,7 @@ http://www.apache.org/licenses/LICENSE-2.0
     recomputeSVGs: function(component) {
         var md = component.find("main_content");
         window.setTimeout(
-            function() {
+            $A.getCallback(function() {
                 var divs = md.getElement().getElementsByClassName('svg_content');
                 for (var i = 0; divs && i < divs.length; i++) {
                     var value = divs[i].innerText;
@@ -238,7 +238,7 @@ http://www.apache.org/licenses/LICENSE-2.0
                         divs[i].innerHTML = value;
                     }
                 }
-            }, 1
+            }), 1
         );
     }
 })

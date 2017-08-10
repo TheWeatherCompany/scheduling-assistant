@@ -53,15 +53,17 @@ http://www.apache.org/licenses/LICENSE-2.0
             }
         }
         // find out which one was clicked and bring it into view
-        window.setTimeout(function() {
+        var md = component.find('main_content').getElement();
+        window.setTimeout(
+          $A.getCallback(function() {
             var ind = 0;
             var container = false;
             if (first24hour != undefined) {
                 ind = parseInt(first24hour);
-                container = document.getElementsByClassName('slds-scrollable--x')[0];
+                container = md.getElementsByClassName('slds-scrollable--x')[0];
             } else if (last24hour != undefined) {
                 ind = parseInt(last24hour);
-                container = document.getElementsByClassName('slds-scrollable--x')[1];
+                container = md.getElementsByClassName('slds-scrollable--x')[1];
             } else return;
 
             var node = container.getElementsByClassName('slds-box')[ind];
@@ -74,7 +76,7 @@ http://www.apache.org/licenses/LICENSE-2.0
             } else if (node_pos.left - 34 < container.scrollLeft) {
                 container.scrollLeft = node_pos.left - 34;
 			}
-        }, 0);
+        }), 0);
     },
     addressUpdatedEventHandler: function(component, event, helper) {
 
