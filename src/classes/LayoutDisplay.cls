@@ -7,7 +7,7 @@ You may obtain a copy of the License at
 http://www.apache.org/licenses/LICENSE-2.0
 */
 
-public class LayoutDisplay {
+public with sharing class LayoutDisplay {
     public List<LayoutSection> layoutSections { get; private set; }
     //public List<LayoutSection> multirowLayoutSections { get; private set; }
     public SObject obj { get; set; }
